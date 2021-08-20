@@ -4,6 +4,7 @@ void setup() {
   // put your setup code here, to run once:
   Wire.begin(10);
   Wire.onReceive(escuchar);
+  Serial.begin(9600);
 }
 
 void loop() {
@@ -12,6 +13,10 @@ void loop() {
 }
 
 void escuchar(int numBytes){
-  
-  
+  while(numBytes>0){
+    char c = Wire.read();
+    Serial.print(c);
+    numBytes--;
+    } 
+    Serial.println();
   }
