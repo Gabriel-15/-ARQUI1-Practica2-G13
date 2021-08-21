@@ -4,6 +4,9 @@
 #include <Wire.h>
 LiquidCrystal lcd(7,6,5,4,3,2);
 String msj="";
+
+#define DS1621_ADDRESS  0x49
+
 void setup() {
   // put your setup code here, to run once:
   Wire.begin(10);
