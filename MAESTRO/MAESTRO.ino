@@ -4,11 +4,24 @@
 #include <LiquidCrystal_I2C.h>
 #include <Wire.h>
 
+////LETRA Ñ
+ byte enie[8] =
+ {
+ 0b00001111,
+ 0b00000000,
+ 0b00011001,
+ 0b00011001,
+ 0b00010101,
+ 0b00010101,
+ 0b00010011,
+ 0b00010011
+ };
+
 LiquidCrystal_I2C lcd(0x20,18,2);
-LiquidCrystal_I2C lcd2(0x27,16,2);
 ////constantes para las filas y columnas del Pad
 const byte rows =4;
 const byte columns=3;
+
 /////char que contendra la contraseña correcta
 Password pass ="202113";
 /////////////MATRIZ QUE CONTENDRA LOS BOTONES DEL PAD///////
@@ -26,10 +39,13 @@ Keypad keypad = Keypad(makeKeymap(keys),rowPins,columnPins,rows,columns);
 
 void setup() {
   // put your setup code here, to run once:
+  
   lcd.init();
-  lcd2.init();
+  Wire.beginTransmission(10);
+  mensajeApagado();
+  lcd.createChar(1,enie);
   keypad.addEventListener(keypadEvent);
-//  mensajePrincipal();
+  mensajePrincipal();
 }
 
 void loop() {
@@ -40,13 +56,17 @@ void loop() {
 //  delay(1000); 
 keypad.getKey();
 }
+
+//METODO PARA VALIDACION DE CONTRASEÑA
  void keypadEvent(KeypadEvent eKey){
   switch(keypad.getState()){
   case PRESSED:
-  lcd.print(eKey);
+//  lcd.print(eKey);
   switch(eKey){
     case '*': verificaPassword();break;
-    case '#': lcd2.clear();lcd2.print("APAGADO");pass.reset();break;
+    case '#': 
+    mensajeApagado();
+    pass.reset();break;
     default: pass.append(eKey);
     }
     }
@@ -54,25 +74,42 @@ keypad.getKey();
 
   void verificaPassword(){
     if(pass.evaluate()){
-      lcd2.clear();
-      mensajeBienvenido();
+     mensajeBienvenido();
       }else{
-        lcd.clear();
-        lcd2.clear();
-        lcd2.print("INCORRECTO");
+  mensajeError();
         pass.reset();
         }
     
     }
-
+///MENSAJE DE CONTRASEÑA INCORRECTA
+void mensajeError(){
+  lcd.clear();
+  lcd.setCursor(3,0);
+  lcd.print("ERROR EN ");
+  lcd.setCursor(2,1);
+  lcd.print("CONTRASE");
+  lcd.write(1);
+  lcd.print("A");
+  }
+  ///MENSAJE DE CONTRASEÑA CORRECTA
 void mensajeBienvenido(){
-      lcd2.print("BIENVENIDO");
+      lcd.clear();
+      lcd.setCursor(2,0);
+      lcd.print("BIENVENIDO A");
+      lcd.setCursor(6,1);
+      lcd.print("CASA");
       }
 /////////////////MENSAJE PRINCIPAL LC1///////////////
-//void mensajePrincipal(){
-//   lcd.backlight();
-//  lcd.setCursor(3,0);
-//  lcd.print("CASA ACYE1");
-//  lcd.setCursor(4,1);
-//  lcd.print("A-G13-S2");
-//  }
+void mensajePrincipal(){
+  lcd.setCursor(3,0);
+  lcd.print("CASA ACYE1");
+  lcd.setCursor(4,1);
+  lcd.print("A-G13-S2");
+  }
+
+  //ENVIO DE MENSAJE A ESCLAVO
+ void mensajeApagado(){
+   Wire.write("APAGADO");
+   Wire.endTransmission(); 
+    
+  }

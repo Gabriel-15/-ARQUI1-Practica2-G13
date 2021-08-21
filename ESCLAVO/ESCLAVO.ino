@@ -1,5 +1,9 @@
-#include <Wire.h>
+#include <LiquidCrystal.h>
 
+
+#include <Wire.h>
+LiquidCrystal lcd(7,6,5,4,3,2);
+String msj="";
 void setup() {
   // put your setup code here, to run once:
   Wire.begin(10);
@@ -15,8 +19,10 @@ void loop() {
 void escuchar(int numBytes){
   while(numBytes>0){
     char c = Wire.read();
-    Serial.print(c);
+    msj+=c;
+    lcd.clear();
     numBytes--;
     } 
-    Serial.println();
+    lcd.setCursor(4,0);
+   lcd.print(msj);
   }
