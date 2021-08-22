@@ -4,7 +4,11 @@
 #include <LiquidCrystal_I2C.h>
 #include <Wire.h>
 
+///direccion para el sensor de temperatura
+int DS1621_ADDRESS =  0x49;
+int temperature=0;
 ////LETRA Ñ
+
  byte enie[8] =
  {
  0b00001111,
@@ -39,21 +43,19 @@ Keypad keypad = Keypad(makeKeymap(keys),rowPins,columnPins,rows,columns);
 
 void setup() {
   // put your setup code here, to run once:
-  
-  lcd.init();
-  Wire.beginTransmission(10);
-  mensajeApagado();
-  lcd.createChar(1,enie);
-  keypad.addEventListener(keypadEvent);
-  mensajePrincipal();
-}
+    lcd.init();
+    Serial.begin(9600);
 
+  Wire.begin();
+   mensajePrincipal();
+   mensajeApagado();
+  keypad.addEventListener(keypadEvent);
+  
+ 
+ }
+//Variables a utilizar para el sensor
 void loop() {
-  // put your main code here, to run repeatedly:
-//  Wire.beginTransmission(10);
-//  Wire.write("hola");
-//  Wire.endTransmission(); 
-//  delay(1000); 
+
 keypad.getKey();
 }
 
@@ -61,7 +63,6 @@ keypad.getKey();
  void keypadEvent(KeypadEvent eKey){
   switch(keypad.getState()){
   case PRESSED:
-//  lcd.print(eKey);
   switch(eKey){
     case '*': verificaPassword();break;
     case '#': 
@@ -75,8 +76,9 @@ keypad.getKey();
   void verificaPassword(){
     if(pass.evaluate()){
      mensajeBienvenido();
+     obtenerTemperatura();
       }else{
-  mensajeError();
+       mensajeError();
         pass.reset();
         }
     
@@ -109,7 +111,27 @@ void mensajePrincipal(){
 
   //ENVIO DE MENSAJE A ESCLAVO
  void mensajeApagado(){
+   Wire.beginTransmission(10);
    Wire.write("APAGADO");
    Wire.endTransmission(); 
-    
+   delay(1000);  
   }
+ //METODO QUE CONTROLARA EL SENSOR PARA ENVIAR LOS DATOS AL ARDUINO ESCLAVO
+ 
+void obtenerTemperatura() {
+ Wire.beginTransmission(DS1621_ADDRESS);
+  Wire.write(0xAC);
+  Wire.write(0x02);
+  Wire.beginTransmission(DS1621_ADDRESS);
+  Wire.write(0xEE);
+  Wire.endTransmission();
+  
+
+  delay(1000);
+  Wire.beginTransmission(DS1621_ADDRESS); // conexxion con el DS1621
+  Wire.write(0xAA);                       // comando para leer la temperatura
+  Wire.endTransmission();            // send repeated start condition
+  Wire.requestFrom(DS1621_ADDRESS, 2);    // request 2 bytes from DS1621 and release I2C bus at end of reading
+  temperature=Wire.read();
+  Serial.print(temperature);
+}

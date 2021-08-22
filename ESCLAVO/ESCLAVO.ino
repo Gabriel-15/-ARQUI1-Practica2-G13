@@ -2,30 +2,45 @@
 
 
 #include <Wire.h>
-LiquidCrystal lcd(7,6,5,4,3,2);
-String msj="";
+LiquidCrystal LCD(13,12,11,10,9,8);
 
-#define DS1621_ADDRESS  0x49
+
+int direccion1=10;
+int direccion2=0x49;// 0x49;
+
 
 void setup() {
-  // put your setup code here, to run once:
-  Wire.begin(10);
-  Wire.onReceive(escuchar);
-  Serial.begin(9600);
+  // put your set
+Wire.begin(direccion1);
+Wire.onReceive(escuchar);
+
+
+
+
+Serial.begin(9600);
+//Wire.begin( DS1621_ADDRESS );
+//Wire.onReceive(escucharSensor);
+
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
 
 }
-
+void sensor(int cantidadBytes){
+  LCD.clear();
+  while(cantidadBytes>0){
+    char c=Wire.read();
+    LCD.print(c);
+    cantidadBytes--;
+    }
+  }
+//  }
 void escuchar(int numBytes){
+  LCD.clear();
   while(numBytes>0){
-    char c = Wire.read();
-    msj+=c;
-    lcd.clear();
+   char c = Wire.read();
+    LCD.print(c);
     numBytes--;
     } 
-    lcd.setCursor(4,0);
-   lcd.print(msj);
   }
