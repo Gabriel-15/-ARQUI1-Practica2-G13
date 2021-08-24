@@ -44,10 +44,11 @@ const byte columnPins[columns]={13,12,11};
 Keypad keypad = Keypad(makeKeymap(keys),rowPins,columnPins,rows,columns);
 
 void setup() {
+  
   // put your setup code here, to run once:
-    lcd.init();
-    
-keypad.addEventListener(keypadEvent);
+   lcd.init();
+   lcd.createChar(1,enie);  
+   keypad.addEventListener(keypadEvent);
    Wire.begin();
    mensajePrincipal();
    
