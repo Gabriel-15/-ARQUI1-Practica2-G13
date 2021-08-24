@@ -7,6 +7,8 @@
 ///direccion para el sensor de temperatura
 int DS1621_ADDRESS =  0x49;
 int temperature=0;
+boolean banderaTemperatura = false;
+
 ////LETRA Ñ
 
  byte enie[8] =
@@ -44,40 +46,46 @@ Keypad keypad = Keypad(makeKeymap(keys),rowPins,columnPins,rows,columns);
 void setup() {
   // put your setup code here, to run once:
     lcd.init();
-    Serial.begin(9600);
-
-  Wire.begin();
+    
+keypad.addEventListener(keypadEvent);
+   Wire.begin();
    mensajePrincipal();
-   mensajeApagado();
-  keypad.addEventListener(keypadEvent);
-  
- 
+   
  }
-//Variables a utilizar para el sensor
-void loop() {
 
+void loop() {
 keypad.getKey();
 }
 
 //METODO PARA VALIDACION DE CONTRASEÑA
  void keypadEvent(KeypadEvent eKey){
+ 
   switch(keypad.getState()){
   case PRESSED:
   switch(eKey){
     case '*': verificaPassword();break;
     case '#': 
-    mensajeApagado();
-    pass.reset();break;
+    
+    break;
     default: pass.append(eKey);
     }
-    }
+    
+  }
   }
 
   void verificaPassword(){
+    
     if(pass.evaluate()){
      mensajeBienvenido();
+     while(true){
      obtenerTemperatura();
-      }else{
+     
+        if(keypad.isPressed('#')){
+       ///////////AQUI VA LO QUE SE TIENE QUE REALIZAR DESPUES DE PRECIONAR LA TECLA #   apagarMotores();
+          break;     
+          }
+      }
+     }else{
        mensajeError();
         pass.reset();
         }
@@ -110,28 +118,31 @@ void mensajePrincipal(){
   }
 
   //ENVIO DE MENSAJE A ESCLAVO
- void mensajeApagado(){
-   Wire.beginTransmission(10);
-   Wire.write("APAGADO");
-   Wire.endTransmission(); 
-   delay(1000);  
-  }
+
  //METODO QUE CONTROLARA EL SENSOR PARA ENVIAR LOS DATOS AL ARDUINO ESCLAVO
  
 void obtenerTemperatura() {
- Wire.beginTransmission(DS1621_ADDRESS);
+  
+  Wire.beginTransmission(DS1621_ADDRESS);
   Wire.write(0xAC);
   Wire.write(0x02);
   Wire.beginTransmission(DS1621_ADDRESS);
   Wire.write(0xEE);
   Wire.endTransmission();
   
-
   delay(1000);
   Wire.beginTransmission(DS1621_ADDRESS); // conexxion con el DS1621
   Wire.write(0xAA);                       // comando para leer la temperatura
   Wire.endTransmission();            // send repeated start condition
   Wire.requestFrom(DS1621_ADDRESS, 2);    // request 2 bytes from DS1621 and release I2C bus at end of reading
   temperature=Wire.read();
-  Serial.print(temperature);
+  
+ 
+  Wire.endTransmission();
+  
+  Wire.beginTransmission(10);
+  Wire.write(temperature);
+  Wire.endTransmission();
+   
 }
+  
