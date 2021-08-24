@@ -12,6 +12,7 @@ LiquidCrystal LCD(13,12,11,10,9,8);
 int pin1=7;
 int pin2=8;
 
+int c_temp;
 //int DS1621_ADDRESS =0x49;// 0x49;
 byte grados[8]=
 {
@@ -47,11 +48,11 @@ void loop() {
 //  }
 void escuchar(int numBytes){ 
   
-  while(numBytes>0){
+  while(numBytes > 0){
     
    int c = Wire.read();
   
-     if(c<=18){
+     if(c>=0 && c<=18){
     LCD.clear();
     LCD.setCursor(0,0);
     LCD.print("TEMP: ");
@@ -62,7 +63,26 @@ void escuchar(int numBytes){
     LCD.print("Nivel: 1");  
     digitalWrite(7,LOW);
     digitalWrite(6,LOW);
-    }else if(c>18&&c<25){
+    }
+    
+    else if(c>=200){
+    c_temp = c-256;
+    LCD.clear();
+    LCD.setCursor(0,0);
+    LCD.print("TEMP: ");
+    
+    LCD.print(c_temp);
+    LCD.write(1);
+    LCD.print("C");
+    LCD.setCursor(0,1);
+    LCD.print("Nivel: 1");   
+    digitalWrite(7,LOW);
+    digitalWrite(6,LOW);
+    }
+    
+    
+    
+    else if(c>18&&c<25){
     LCD.clear();
     LCD.setCursor(0,0);
     LCD.print("TEMP: ");
@@ -73,7 +93,8 @@ void escuchar(int numBytes){
     LCD.print("Nivel: 2");   
     digitalWrite(7,HIGH);
     digitalWrite(6,LOW);
-      }else if((c>=25&&c<75)||(c>75)){
+      }
+      else if(c>=25 && c<200){
     LCD.clear();
     LCD.setCursor(0,0);
     LCD.print("TEMP: ");
